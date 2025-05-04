@@ -1,10 +1,15 @@
+{% extends "base/base.html" %}
+
+{% block title %}Главная API{% endblock %}
+
+{% block content %}
 <h1>Landing Page</h1>
 <h3>{{ data.title }}</h3>
 <h3>{{ data.description }}</h3>
 
 <ul>
     {% for link in data.links %}
-        <li>{{ link.title }} - <a href="{{ link.href }}">{{ link.href }}<a/></li>
+        <li>{{ link.title }} - <a href="http://localhost:8000/view/processes">{{ link.href }}<a/></li>
     {% endfor %}
 </ul>
-
+{% endblock %}
