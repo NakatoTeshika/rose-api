@@ -9,10 +9,10 @@ body {
 }
 
 .site-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto repeat(3, 1fr);
+  column-gap: 120px;
   align-items: center;
-  justify-content: flex-start;
-  gap: 80px;
   background: #F5F5F5;
   padding: 10px 120px;
   width: 100%;
@@ -21,43 +21,40 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  flex: 0 0 auto;
 }
 
 .brand__logo {
   width: 95px;
   height: 95px;
+  margin-right: 8px;
 }
 
-.site-nav {
-  display: flex;
-  flex: 1 1 auto;
-  justify-content: space-evenly;
+.brand__text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
 }
 
-.site-nav a {
+.nav-link {
+  justify-self: center;
   text-decoration: none;
   color: #000;
   font-size: 14px;
   font-weight: 600;
-  white-space: nowrap;
   transition: transform 0.2s ease-in-out;
 }
 
-.site-nav a:hover {
+.nav-link:hover {
   transform: scale(1.1);
 }
 
 @media (max-width: 1024px) {
   .site-header {
+    display: flex;
     flex-direction: column;
     padding: 30px 60px;
     gap: 20px;
     justify-content: center;
-  }
-  .site-nav {
-    width: 100%;
-    justify-content: space-around;
   }
 }
 
@@ -65,7 +62,7 @@ body {
   .site-header {
     padding: 20px;
   }
-  .site-nav {
+  .site-header {
     flex-direction: column;
     gap: 16px;
     align-items: center;
