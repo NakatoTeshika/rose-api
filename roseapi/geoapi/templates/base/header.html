@@ -1,0 +1,26 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Header</title>
+  <link rel="stylesheet" href="{% static 'css/header.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <a href="#home">
+        <img class="brand__logo" src="{% static 'images/logo.png' %}" alt="ROSE-API Logo">
+      </a>
+    </div>
+    <nav class="site-nav">
+      <a href="#collections">Collections</a>
+      <a href="#upload">Upload Data</a>
+      <a href="#processes">Processes</a>
+    </nav>
+  </header>
+</body>
+</html>
