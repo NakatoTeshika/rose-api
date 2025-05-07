@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+
+{% block title %}Processes{% endblock %}
+
+{% block content %}
+  <h1 class="page-title">Processes in this service</h1>
+  <div class="processes-container">
+
+    <div id="loader" class="loader">Loading...</div>
+
+    <div class="table-wrapper" style="display: none">
+      <table id="processes-table" class="responsive-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="empty-message" class="empty-message" style="display: none;">
+      No processes available.
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/processes.js' %}"></script>
+{% endblock %}
