@@ -4,12 +4,12 @@
 
 <header class="site-header">
   <div class="brand">
-    <a href="#home">
+    <a href="#">
       <img class="brand__logo" src="{% static 'images/logo.png' %}" alt="ROSE-API Logo">
     </a>
   </div>
 
   <a class="nav-link" href="#collections">Collections</a>
   <a class="nav-link" href="#upload">Upload Data</a>
-  <a class="nav-link" href="#admin">Admin</a>
+  <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
 </header>
