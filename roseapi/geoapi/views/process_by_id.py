@@ -74,7 +74,7 @@ def process_by_id(request: HttpRequest, id: str):
         outputs=outputs
     )
 
-    if f == utils.F_HTML[0]:
+    if f in utils.F_HTML:
         return render(request, "processes/process.html", {
             "process": process_to_return
         })

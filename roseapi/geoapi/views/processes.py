@@ -122,8 +122,7 @@ def processes(request: HttpRequest):
         **processes_object.to_object()
     }
 
-    if f == utils.F_HTML[0]:
-        print('here')
+    if f in utils.F_HTML:
         return render(request, 'processes/processes.html', {
             'processes': items,
             'links': links,

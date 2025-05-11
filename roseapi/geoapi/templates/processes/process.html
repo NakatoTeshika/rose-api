@@ -1,4 +1,6 @@
 {% extends 'base/base.html' %}
+{% load static %}
+
 {% block title %}{{ process.title|default:process.id }}{% endblock %}
 
 {% block content %}
@@ -74,5 +76,9 @@
     {% endfor %}
   </ul>
 </div>
+{% endblock %}
+
+{% block styles %}
+        <link rel="stylesheet" href="{% static 'css/process.css' %}">
 {% endblock %}
 
