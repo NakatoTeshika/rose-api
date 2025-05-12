@@ -4,6 +4,14 @@
 
 {% block title %}Items{% endblock %}
 
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <div>
+      <ol class="breadcrumb"></ol>
+    </div>
+  </nav>
+{% endblock %}
+
 {% block content %}
 <h1 class="title">{{ collection.title }}</h1>
 
@@ -74,6 +82,22 @@
     const pathParts = window.location.pathname.split('/');
     const modelName = pathParts[3] || '';
 
+    // Parse URL segments
+    const collectionsUrl = '/api/collections?f=html';
+    const modelUrl = `/api/collections/${modelName}?f=html`;
+    const itemsUrl = `/api/collections/${modelName}/items?f=html`;
+
+    // Update breadcrumbs dynamically
+    const breadcrumbEl = document.querySelector('.breadcrumb');
+    if (breadcrumbEl) {
+      breadcrumbEl.innerHTML = `
+        <li class="breadcrumb-item"><a href="${collectionsUrl}">Collections</a></li>
+        <li class="breadcrumb-item"><a href="${modelUrl}">
+    ${modelName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+  </a></li>
+        <li class="breadcrumb-item active" aria-current="page">Items</li>
+      `;
+    }
     // Fetch collection metadata to set proper title
     fetch(`/api/collections/${modelName}?f=json`)
       .then(res => res.json())

@@ -5,9 +5,24 @@
 {% block title %}{{ collection.title }} – {{ feature.pk }}{% endblock %}
 
 {% block styles %}
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  {{ block.super }}
   <link rel="stylesheet" href="{% static 'css/item_detail.css' %}">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/api/collections?f=html">Collections</a></li>
+      <li class="breadcrumb-item">
+        <a href="/api/collections/{{ collection.model_name }}?f=html">{{ collection.title }}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="/api/collections/{{ collection.model_name }}/items?f=html">Items</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ feature.pk }}</li>
+    </ol>
+  </nav>
 {% endblock %}
 
 {% block content %}

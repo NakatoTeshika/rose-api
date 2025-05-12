@@ -6,14 +6,17 @@
     {% load static %}
 
     {% block styles %}
-        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        <link rel="stylesheet" href="{% static 'css/breadcrumbs.css' %}">
     {% endblock %}
 </head>
 <body style="display: flex; flex-direction: column; min-height: 100vh;">
 
     {% include "base/header.html" %}
-
+    {% block breadcrumbs %}
+      {% include "base/breadcrumbs.html" with collection=collection feature=feature %}
+    {% endblock %}
     <main style="flex: 1; padding: 20px;">
+
       {% block content %}{% endblock %}
     </main>
 

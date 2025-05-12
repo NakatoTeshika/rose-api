@@ -3,6 +3,15 @@
 
 {% block title %}{{ data.title }}{% endblock %}
 
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/api/collections?f=html">Collections</a></li>
+      <li class="breadcrumb-item active">{{ data.title }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+
 {% block content %}
   <h1 class="page-title">{{ data.title }}</h1>
   <p class="description">{{ data.description }}</p>
@@ -123,5 +132,6 @@
 {% endblock %}
 
 {% block styles %}
+  {{ block.super }}
   <link rel="stylesheet" href="{% static 'css/collection.css' %}">
 {% endblock %}
