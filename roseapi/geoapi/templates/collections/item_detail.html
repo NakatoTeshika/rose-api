@@ -7,6 +7,7 @@
 {% block styles %}
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/item_detail.css' %}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 {% endblock %}
 
 {% block content %}
@@ -46,20 +47,33 @@
 
 {% block scripts %}
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-
   <script>
-    const lat = parseFloat("{{ properties.latitude|default:'0' }}");
-    const lon = parseFloat("{{ properties.longitude|default:'0' }}");
+    document.addEventListener('DOMContentLoaded', () => {
+      // Extract collection name and item ID from URL
+      const parts = window.location.pathname.split('/');
+      const modelName = parts[3] || '';
+      const itemId = parts[5] || '';
 
-    const map = L.map('map').setView([lat, lon], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-    }).addTo(map);
+      // Initialize map at default location
+      const map = L.map('map').setView([0, 0], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+      }).addTo(map);
 
-    const marker = L.marker([lat, lon]).addTo(map);
-    marker.bindPopup(`
-      <b>{{ feature.pk }}</b>
-    `).openPopup();
+      // Fetch GeoJSON for accurate coordinates
+      fetch(`/api/collections/${modelName}/items/${itemId}?f=geojson`)
+        .then(response => response.json())
+        .then(geojson => {
+          // Expect a Feature
+          const coords = geojson.geometry.coordinates; // [lon, lat]
+          const lon = coords[0];
+          const lat = coords[1];
+          // Re-center map and add marker
+          map.setView([lat, lon], 13);
+          const marker = L.marker([lat, lon]).addTo(map);
+          marker.bindPopup(`<b>${itemId}</b>`).openPopup();
+        })
+        .catch(error => console.error('Error loading GeoJSON:', error));
+    });
   </script>
 {% endblock %}
