@@ -1,0 +1,65 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ collection.title }} – {{ feature.pk }}{% endblock %}
+
+{% block styles %}
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/item_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 class="item-title">{{ feature.pk }}</h1>
+
+<div class="item-container">
+  <div id="map" class="item-map"></div>
+
+  <table class="item-table">
+    <thead>
+      <tr>
+        <th>Property</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for field in fields %}
+        {% with value=properties|dict_get:field %}
+          <tr>
+            <td>{{ field }}</td>
+            <td>
+              {% if "http" in value|stringformat:"s" %}
+                <a href="{{ value }}" target="_blank">{{ value }}</a>
+              {% elif ".jpg" in value|stringformat:"s" or ".png" in value|stringformat:"s" %}
+                <img src="{{ value }}" alt="{{ field }}" class="thumbnail" />
+              {% else %}
+                {{ value }}
+              {% endif %}
+            </td>
+          </tr>
+        {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+
+  <script>
+    const lat = parseFloat("{{ properties.latitude|default:'0' }}");
+    const lon = parseFloat("{{ properties.longitude|default:'0' }}");
+
+    const map = L.map('map').setView([lat, lon], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    const marker = L.marker([lat, lon]).addTo(map);
+    marker.bindPopup(`
+      <b>{{ feature.pk }}</b>
+    `).openPopup();
+  </script>
+{% endblock %}
