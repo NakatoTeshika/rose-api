@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewArea = document.getElementById('previewArea');
   const labelSpan = document.querySelector('.file-label span');
 
-  // Load available collections
   fetch('/api/collections?f=json')
     .then(r => r.json())
     .then(data => {
@@ -40,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
       : 'Choose file';
   });
 
-  // Preview handler (unchanged) …
   previewBtn.addEventListener('click', () => {
     const file = fileInput.files[0];
     previewArea.innerHTML = 'Loading preview…';
@@ -72,9 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsText(file);
   });
 
-  // Upload handler: send to Django view at /collections/<collectionId>/input
   uploadBtn.addEventListener('click', () => {
-    const collectionId = sel.value;  // <-- берём прямо из sel.value
+    const collectionId = sel.value;
     if (!collectionId) {
       alert('Please select a collection');
       return;
@@ -86,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadBtn.disabled = true;
     uploadBtn.textContent = 'Uploading…';
 
-    // Обратите внимание на обратные кавычки вокруг URL
     fetch(`/api/collections/${collectionId}/input`, {
       method: 'POST',
       body: form,

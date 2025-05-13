@@ -86,17 +86,15 @@
   border-radius: 12px;
   background: #f9f9f9;
 
-  /* не меньше 400px, и не больше 60% высоты экрана */
   min-height: 400px;
   max-height: 60vh;
 
   padding: 1rem;
-  overflow-y: auto;   /* вертикальный скролл при переполнении */
-  overflow-x: auto; /* прячем горизонтальный скролл */
+  overflow-y: auto;
+  overflow-x: auto;
   box-sizing: border-box;
 }
 
-/* Адаптив */
 @media (max-width: 600px) {
   .control, .buttons {
     flex-direction: column;
