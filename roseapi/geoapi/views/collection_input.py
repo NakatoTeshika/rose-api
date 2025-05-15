@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.contrib.gis.geos import GEOSGeometry, Point
 from django.shortcuts import render
+from django.apps import apps
 
 from geoapi import models as geoapi_models
 from geoapi import responses
@@ -19,7 +20,6 @@ from geoapi import responses
 @require_http_methods(["POST"])
 def collection_input(request: HttpRequest, collectionId: str):
     print(collectionId)
-    # Validate incoming request
     try:
         validate_collection_input(request, collectionId)
     except ValidationError as e:
@@ -27,13 +27,11 @@ def collection_input(request: HttpRequest, collectionId: str):
 
     file_obj = request.FILES['file']
 
-    # Parse uploaded file (CSV or GeoJSON)
     try:
         raw_items = parse_uploaded_file(file_obj)
     except ValueError as ve:
         return HttpResponse(str(ve), status=400)
 
-    # Retrieve collection metadata and model class
     try:
         collection_instance = geoapi_models.Collection.objects.get(model_name=collectionId)
         collection_model = geoapi_models.get_model(collection_instance)
@@ -43,22 +41,17 @@ def collection_input(request: HttpRequest, collectionId: str):
     except Exception as ex:
         return HttpResponse(str(ex), status=500)
 
-    # Coerce, validate and filter raw items according to field definitions
     try:
         items = coerce_validate_items(raw_items, fields_def)
     except ValidationError as e:
         return HttpResponse(str(e), status=400)
 
-    # Bulk insert into the model
     try:
         new_items = bulk_insert_items(collection_model, items)
     except RuntimeError as re:
         return HttpResponse(str(re), status=500)
 
     return responses.response_json_200(new_items)
-
-
-# -- Parsing helpers --
 
 def parse_csv_file(file_obj):
     try:
@@ -106,13 +99,8 @@ def parse_uploaded_file(file_obj):
 
 
 # -- Coercion, dynamic validation and filtering --
-from django.apps import apps
 
 def coerce_validate_items(raw_items, fields_def):
-    """
-    Convert raw values to Python types based on Django field types, then validate according to options.
-    fields_def: list of dicts with keys 'name', 'type', 'options'.
-    """
     def _parse_point(val):
         if isinstance(val, str) and ',' in val:
             lng, lat = map(float, val.split(','))
@@ -128,9 +116,9 @@ def coerce_validate_items(raw_items, fields_def):
         return val.quantize(quant, rounding=ROUND_HALF_UP)
 
     def validate_constraints(field, value):
-        ftype = field.get('type', '').lower()
+        ftype = field['type'].lower()
         opts = field.get('options', {})
-        name = field.get('name')
+        name = field['name']
         if value is None:
             return
         if ftype in ('charfield', 'textfield'):
@@ -152,12 +140,8 @@ def coerce_validate_items(raw_items, fields_def):
         to_model_name = opts.get('to')
         if not to_model_name:
             raise ValueError("Missing 'to' in ForeignKey field options")
-
-        model_name = to_model_name.lower()
-        model = getattr(geoapi_models, model_name, None)
-
+        model = getattr(geoapi_models, to_model_name.lower(), None)
         if not model:
-            # fallback via apps.get_model in case of CamelCase or external app
             for app_label in ['geoapi']:
                 try:
                     model = apps.get_model(app_label, to_model_name)
@@ -166,11 +150,11 @@ def coerce_validate_items(raw_items, fields_def):
                 except LookupError:
                     continue
         if not model:
-            raise ValueError(f"Model '{to_model_name}' not found in geoapi.models")
+            raise ValueError(f"Model '{to_model_name}' not found")
         return model.objects.get(pk=value)
 
     type_map = {
-        'integerfield': int,
+        'integerfield': lambda v: int(float(v)),      # accepts "309.0"
         'floatfield': float,
         'decimalfield': Decimal,
         'charfield': str,
@@ -185,21 +169,29 @@ def coerce_validate_items(raw_items, fields_def):
 
     validated = []
     for idx, row in enumerate(raw_items, start=1):
+        allowed = {f['name'] for f in fields_def} | {'id', 'geometry'}
+        extra = set(row.keys()) - allowed
+        if extra:
+            raise ValidationError(f"Row {idx}: Unexpected field(s): {', '.join(sorted(extra))}")
+
         item = {}
         for field in fields_def:
-            name = field.get('name')
+            name = field['name']
             raw_val = row.get(name)
             opts = field.get('options', {})
-            is_nullable = opts.get('null', False)
+
+            is_nullable   = opts.get('null', True)
+            is_primarykey = opts.get('primary_key', False)
+            is_required   = not is_nullable and not is_primarykey
+
+            # Required vs optional
             if raw_val in (None, ''):
-                if is_nullable:
+                if not is_required:
                     item[name] = None
                     continue
-                if field.get('type', '').lower().endswith('charfield'):
-                    item[name] = ''
-                    continue
                 raise ValidationError(f"Row {idx}: Missing required field '{name}'")
-            ftype = field.get('type', '').lower()
+
+            ftype = field['type'].lower()
             conv = type_map.get(ftype)
             try:
                 if ftype == 'decimalfield':
@@ -211,12 +203,16 @@ def coerce_validate_items(raw_items, fields_def):
                     val = conv(raw_val) if conv else raw_val
             except Exception as ex:
                 raise ValidationError(f"Row {idx}: Failed to convert '{name}' ({ftype}): {ex}")
+
             try:
                 validate_constraints(field, val)
             except ValidationError as ex:
                 raise ValidationError(f"Row {idx}, field '{name}': {ex}")
+
             item[name] = val
+
         validated.append(item)
+
     return validated
 
 def get_collection_model_from_id(collection_id):
