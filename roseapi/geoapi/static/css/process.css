@@ -29,7 +29,6 @@
   }
   th {
     background-color: #cfe2e4;
-    border-radius: 0.3rem;
   }
   .paddings {
     padding-bottom: 0.5rem;;
@@ -86,7 +85,6 @@ th, td {
 
 th {
   background-color: #cfe2e4;
-  border-radius: 0.3rem;
 }
 
 .paddings {
