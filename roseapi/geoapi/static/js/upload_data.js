@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
       sel.innerHTML = '<option value="">Error loading</option>';
     });
 
-  // File selector label
   document.querySelector('.file-label').addEventListener('click', () => {
     fileInput.click();
   });

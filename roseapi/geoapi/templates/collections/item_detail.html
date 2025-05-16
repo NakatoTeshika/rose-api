@@ -64,7 +64,6 @@
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Extract collection name and item ID from URL
       const parts = window.location.pathname.split('/');
       const modelName = parts[3] || '';
       const itemId = parts[5] || '';
@@ -75,11 +74,9 @@
         attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
       }).addTo(map);
 
-      // Fetch GeoJSON for accurate coordinates
       fetch(`/api/collections/${modelName}/items/${itemId}?f=geojson`)
         .then(response => response.json())
         .then(geojson => {
-          // Expect a Feature
           const coords = geojson.geometry.coordinates; // [lon, lat]
           const lon = coords[0];
           const lat = coords[1];

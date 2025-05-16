@@ -35,7 +35,7 @@ def collection_input(request: HttpRequest, collectionId: str):
     try:
         collection_instance = geoapi_models.Collection.objects.get(model_name=collectionId)
         collection_model = geoapi_models.get_model(collection_instance)
-        fields_def = collection_instance.fields  # List of dicts with 'name', 'type', 'options'
+        fields_def = collection_instance.fields
     except geoapi_models.Collection.DoesNotExist:
         return HttpResponse(f"Collection '{collectionId}' not found.", status=404)
     except Exception as ex:
@@ -99,7 +99,6 @@ def parse_uploaded_file(file_obj):
 
 
 # -- Coercion, dynamic validation and filtering --
-
 def coerce_validate_items(raw_items, fields_def):
     def _parse_point(val):
         if isinstance(val, str) and ',' in val:
@@ -154,7 +153,7 @@ def coerce_validate_items(raw_items, fields_def):
         return model.objects.get(pk=value)
 
     type_map = {
-        'integerfield': lambda v: int(float(v)),      # accepts "309.0"
+        'integerfield': lambda v: int(float(v)),
         'floatfield': float,
         'decimalfield': Decimal,
         'charfield': str,

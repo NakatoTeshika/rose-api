@@ -78,16 +78,13 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Extract model name from URL
     const pathParts = window.location.pathname.split('/');
     const modelName = pathParts[3] || '';
 
-    // Parse URL segments
     const collectionsUrl = '/api/collections?f=html';
     const modelUrl = `/api/collections/${modelName}?f=html`;
     const itemsUrl = `/api/collections/${modelName}/items?f=html`;
 
-    // Update breadcrumbs dynamically
     const breadcrumbEl = document.querySelector('.breadcrumb');
     if (breadcrumbEl) {
       breadcrumbEl.innerHTML = `
@@ -98,7 +95,6 @@
         <li class="breadcrumb-item active" aria-current="page">Items</li>
       `;
     }
-    // Fetch collection metadata to set proper title
     fetch(`/api/collections/${modelName}?f=json`)
       .then(res => res.json())
       .then(meta => {
@@ -107,28 +103,23 @@
       })
       .catch(err => console.error('Failed to fetch collection metadata:', err));
 
-    // State for pagination
     let limit = parseInt(new URLSearchParams(location.search).get('limit')) || 20;
     let offset = parseInt(new URLSearchParams(location.search).get('offset')) || 0;
 
-    // Parse initial items for table
     const initialItems = JSON.parse(
       document.getElementById('items-data').textContent
     );
 
-    // Initialize map and marker cluster
     const map = L.map('map').setView([45.5, 9.1], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Leaflet | Map data © OpenStreetMap contributors'
     }).addTo(map);
     const markers = L.markerClusterGroup().addTo(map);
 
-    // Table header fields
     const headerFields = Array.from(
       document.querySelectorAll('.items-table thead th')
     ).map(th => th.textContent.trim());
 
-    // Update table only
     function updateTable(items) {
       const tbody = document.querySelector('.items-table tbody');
       tbody.innerHTML = '';
@@ -154,7 +145,6 @@
       });
     }
 
-    // Render markers from GeoJSON
     function renderGeoJSON() {
       const geoUrl = `/api/collections/${modelName}/items?limit=${limit}&offset=${offset}&f=geojson`;
       fetch(geoUrl)
@@ -185,11 +175,9 @@
         .catch(err => console.error('GeoJSON load failed:', err));
     }
 
-    // Initial render
     updateTable(initialItems);
     renderGeoJSON();
 
-    // Fetch data for table JSON
     function fetchTable() {
       const url = new URL(location.href);
       url.searchParams.set('limit', limit);
@@ -198,14 +186,12 @@
       return fetch(url).then(res => res.json());
     }
 
-    // Combined update after pagination/input
     function fetchAndUpdate() {
       fetchTable()
         .then(data => updateTable(data))
         .then(() => renderGeoJSON());
     }
 
-    // Handlers
     document.getElementById('applyLimit').addEventListener('click', () => {
       const val = parseInt(document.getElementById('limitInput').value) || 1;
       limit = Math.min(val, 100);
