@@ -77,6 +77,7 @@ def parse_geojson_file(file_obj):
                     coords = geometry.get('coordinates', [])
                     if len(coords) >= 2:
                         props['longitude'], props['latitude'] = coords[0], coords[1]
+                        props['location'] = f"POINT ({coords[0]} {coords[1]})"
                 item = {
                     **props,
                     'geometry': geometry,
