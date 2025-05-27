@@ -1,5 +1,6 @@
 import csv
 import json
+import re
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -166,6 +167,18 @@ def coerce_validate_items(raw_items, fields_def):
         'foreignkey': get_foreignkey_instance,
     }
 
+    type_patterns = {
+        'integerfield':   re.compile(r'^-?\d+(?:\.0+)?$'),
+        'floatfield':     re.compile(r'^-?\d+(\.\d+)?$'),
+        'decimalfield':   re.compile(r'^-?\d+(\.\d+)?$'),
+        'booleanfield':   re.compile(r'^(true|false|1|0|yes|no|y|n)$', re.IGNORECASE),
+        'datefield':      re.compile(r'^\d{4}-\d{2}-\d{2}$'),
+        'datetimefield':  re.compile(
+            r'^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}'
+            r'(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$'
+        ),
+    }
+
     validated = []
     for idx, row in enumerate(raw_items, start=1):
         allowed = {f['name'] for f in fields_def} | {'id', 'geometry'}
@@ -183,7 +196,6 @@ def coerce_validate_items(raw_items, fields_def):
             is_primarykey = opts.get('primary_key', False)
             is_required   = not is_nullable and not is_primarykey
 
-            # Required vs optional
             if raw_val in (None, ''):
                 if not is_required:
                     item[name] = None
@@ -191,6 +203,14 @@ def coerce_validate_items(raw_items, fields_def):
                 raise ValidationError(f"Row {idx}: Missing required field '{name}'")
 
             ftype = field['type'].lower()
+
+            pattern = type_patterns.get(ftype)
+            if pattern and not pattern.match(str(raw_val).strip()):
+                raise ValidationError(
+                    f"Row {idx}, field '{name}': "
+                    f"value '{raw_val}' does not match type {ftype}"
+                )
+
             conv = type_map.get(ftype)
             try:
                 if ftype == 'decimalfield':
