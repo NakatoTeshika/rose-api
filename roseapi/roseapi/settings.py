@@ -13,6 +13,21 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from dotenv import load_dotenv
 from pathlib import Path
 import os
+import logging
+
+logger = logging.getLogger("env_debug")
+logging.basicConfig(level=logging.INFO)
+
+def log_env_var(key, is_secret=False):
+    value = os.getenv(key)
+    if is_secret and value:
+        value = "***hidden***"
+    logger.info(f"[env_debug] {key} = {value}")
+
+log_env_var("POSTGRES_HOST")
+log_env_var("POSTGRES_PORT")
+log_env_var("POSTGRES_NAME")
+log_env_var("POSTGRES_USER")
 
 # Determine if using the local environment file for running locally
 is_running_in_docker = os.getenv('RUNNING_IN_DOCKER', 0)
